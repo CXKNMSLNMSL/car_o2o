@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.wolfcode.car.business.mapper.CarPackageAuditMapper" >
+  <resultMap id="BaseResultMap" type="cn.wolfcode.car.business.domain.CarPackageAudit" >
+    <id column="id" property="id" />
+    <result column="service_item_id" property="serviceItemId" />
+    <result column="service_item_info" property="serviceItemInfo" />
+    <result column="service_item_price" property="serviceItemPrice" />
+    <result column="instance_id" property="instanceId" />
+    <result column="creator" property="creator" />
+    <result column="auditor_id" property="auditorId" />
+    <result column="bpmn_info_id" property="bpmnInfoId" />
+    <result column="info" property="info" />
+    <result column="status" property="status" />
+    <result column="audit_time" property="auditTime" />
+    <result column="create_time" property="createTime" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" >
+    delete from bus_car_package_audit
+    where id = #{id}
+  </delete>
+  <insert id="insert" useGeneratedKeys="true" keyProperty="id" >
+    insert into bus_car_package_audit (service_item_id, service_item_info, service_item_price, instance_id, 
+      creator, auditor_id, bpmn_info_id, info, status, audit_time, create_time
+      )
+    values (#{serviceItemId}, #{serviceItemInfo}, #{serviceItemPrice}, #{instanceId}, 
+      #{creator}, #{auditorId}, #{bpmnInfoId}, #{info}, #{status}, #{auditTime}, #{createTime}
+      )
+  </insert>
+  <update id="updateByPrimaryKey" >
+    update bus_car_package_audit
+    set service_item_id = #{serviceItemId},
+      service_item_info = #{serviceItemInfo},
+      service_item_price = #{serviceItemPrice},
+      instance_id = #{instanceId},
+      creator = #{creator},
+      auditor_id = #{auditorId},
+        bpmn_info_id = #{bpmnInfoId},
+      info = #{info},
+      status = #{status},
+      audit_time = #{auditTime},
+      create_time = #{createTime}
+    where id = #{id}
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" >
+    select id, service_item_id, service_item_info, service_item_price, instance_id, creator, 
+    auditor_id, bpmn_info_id, info, status, audit_time, create_time
+    from bus_car_package_audit
+    where id = #{id}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap" >
+    select id, service_item_id, service_item_info, service_item_price, instance_id, creator, 
+    auditor_id, bpmn_info_id, info, status, audit_time, create_time
+    from bus_car_package_audit
+  </select>
+  <select id="selectForList" resultMap="BaseResultMap" >
+    select id, service_item_id, service_item_info, service_item_price, instance_id, creator,
+           auditor_id, bpmn_info_id, info, status, audit_time, create_time
+    from bus_car_package_audit
+
+    <where>
+      <if test="beginTime != null">
+        and create_time >= #{beginTime}
+      </if>
+      <if test="endTime != null">
+        and DATE_FORMAT(create_time,'%Y-%m-%d')  &lt;= DATE_FORMAT(#{endTime},'%Y-%m-%d')
+      </if>
+        <if test="auditorId != null">
+          and auditor_id = #{auditorId}
+        </if>
+      <if test="status != null">
+        and status = #{status}
+      </if>
+      <if test="info != null and info != ''">
+        and info like concat('%',#{info},'%')
+      </if>
+    </where>
+
+
+  </select>
+
+  <update id="updateInstanceId">
+    update bus_car_package_audit set instance_id = #{instanceId} where id = #{id}
+  </update>
+
+
+  <update id="changeStatus">
+    update bus_car_package_audit set status = #{status} where id = #{id}
+  </update>
+</mapper>

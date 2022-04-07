@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="common/include :: header('养修服务单项列表')" />
+</head>
+<body class="gray-bg">
+<div class="container-div">
+    <div class="row">
+        <div class="col-sm-12 search-collapse">
+            <form id="formId">
+                <div class="select-list">
+                    <ul>
+                        <li>
+                            <label>客户姓名：</label>
+                            <input type="text" name="customerName"/>
+                        </li>
+                        <li>
+                            <label>联系方式：</label>
+                            <input type="text" name="customerPhone"/>
+                        </li>
+                        <li>
+                            <label>状态：</label>
+                            <select name="status" th:with="type=${@dict.getType('cmi_status')}">
+                                <option value="">所有</option>
+                                <option th:each="dict : ${type}" th:text="${dict.label}" th:value="${dict.value}"></option>
+                            </select>
+                        </li>
+                        <li>
+                            <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                            <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                        </li>
+                    </ul>
+                </div>
+            </form>
+        </div>
+
+        <div class="btn-group-sm" id="toolbar" role="group">
+            <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="business:serviceItem:add">
+                <i class="fa fa-plus"></i> 添加
+            </a>
+        </div>
+        <div class="col-sm-12 select-table table-striped">
+            <table id="bootstrap-table"></table>
+        </div>
+    </div>
+</div>
+<th:block th:include="common/include :: footer" />
+<script th:inline="javascript">
+    var editFlag = [[${@permission.hasPermi('business:serviceItem:edit')}]];
+    var arrivalFlag = [[${@permission.hasPermi('business:serviceItem:arrival')}]];
+    var removeFlag = [[${@permission.hasPermi('business:serviceItem:remove')}]];
+    var cancelFlag = [[${@permission.hasPermi('business:serviceItem:cancel')}]];
+    var generateStatementFlag = [[${@permission.hasPermi('business:serviceItem:generateStatement')}]];
+    var serviceTypeDatas = [[${@dict.getType('cmi_service_type')}]];
+    var statusDatas = [[${@dict.getType('cmi_status')}]];
+    var prefix = ctx + "/business/serviceItem";
+
+    $(function() {
+        var options = {
+            url: prefix + "/query",
+            createUrl: prefix + "/addPage",
+            updateUrl: prefix + "/editPage?id={id}",
+            removeUrl: prefix + "/remove",
+            uniqueId:'id',
+            modalName: "养修信息预约",
+            columns: [
+                {
+                    field: 'id',
+                    title: '',
+                    visible: false
+                },
+                {
+                    field: 'customerName',
+                    title: '客户姓名'
+                },
+                {
+                    field: 'customerPhone',
+                    title: '联系方式'
+                },
+                {
+                    field: 'serviceItemTime',
+                    title: '预约时间'
+                },
+                {
+                    field: 'actualArrivalTime',
+                    title: '实际到店时间'
+                },
+                {
+                    field: 'licensePlate',
+                    title: '车牌号码'
+                },
+                {
+                    field: 'carSeries',
+                    title: '汽车类型'
+                },
+                {
+                    field: 'serviceType',
+                    title: '服务类型',
+                    formatter: function(value, row, index) {
+                        return $.table.selectDictLabel(serviceTypeDatas, value);
+                    }
+                },
+                {
+                    field: 'info',
+                    title: '备注信息'
+                },
+                {
+                    field: 'status',
+                    title: '状态',
+                    formatter: function(value, row, index) {
+                        return $.table.selectDictLabel(statusDatas, value);
+                    }
+                },
+                {
+                    title: '操作',
+                    align: 'center',
+                    formatter: function(value, row, index) {
+                        var editBtnFlag = editFlag+" "+(row.status>0?"disabled":"");
+                        var arrivalBtnFlag = arrivalFlag+" "+(row.status>0?"disabled":"");
+                        var statementBtnFlag = generateStatementFlag+" "+((row.status!=1 && row.status!=4)?"disabled":"");
+                        var cancelBtnFlag = cancelFlag+" "+(row.status>0?"disabled":"");
+                        var removeBtnFlag = removeFlag+" "+(row.status>0?"disabled":"");
+                        var actions = [];
+                        actions.push('<a class="btn btn-success btn-xs '+editBtnFlag+'" href="javascript:void(0)" onclick="$.operate.edit(\'' + row.id + '\')"><i class="fa fa-edit"></i>编辑</a> ');
+                        actions.push('<a class="btn btn-warning btn-xs '+arrivalBtnFlag+'" href="javascript:void(0)" onclick="arrivalHandler(\'' + row.id + '\')"><i class="fa fa-sign-in"></i>到店</a> ');
+                        actions.push('<a class="btn btn-primary btn-xs '+statementBtnFlag+'" href="javascript:void(0)" onclick="generateStatement(\'' + row.id + '\')"><i class="fa fa-remove"></i>结算单</a> ');
+                        var more = [];
+
+                        more.push("<a class='btn btn-default btn-xs "+cancelBtnFlag+"' href='javascript:void(0)' onclick='cancelHandler("+row.id+")'  ><i class='fa fa-reply'></i>取消</a> ");
+                        more.push("<a class='btn btn-default btn-xs "+removeBtnFlag+"' href='javascript:void(0)' onclick='removeHandler(" + row.id + ")'><i class='fa fa-remove'></i>删除</a>");
+                        actions.push('' +
+                            '<a tabindex="0" class="btn btn-info btn-xs" role="button" data-container="body" ' +
+                            'data-placement="left" data-toggle="popover" data-html="true" ' +
+                            'data-trigger="hover" data-content="' + more.join('') + '">' +
+                            '<i class="fa fa-chevron-circle-right"></i>更多操作' +
+                            '</a>');
+
+                        return actions.join('');
+                    }
+                }]
+        };
+        $.table.init(options);
+    });
+
+    function arrivalHandler(id) {
+        $.modal.confirm("确认客户已到店了么？", function () {
+            $.operate.submit(prefix + "/arrival?id=" + id)
+        })
+
+    }
+
+
+
+    //1:给取消按钮绑定一个点击事件
+    //2:定义一个函数处理点击事件
+    //   1>弹出询问确认框
+    //   2>发起异步请求，执行取消逻辑
+    function cancelHandler(id) {
+        $.modal.confirm("确定要取消预约么？", function () {
+            $.operate.submit(prefix + "/cancel?id=" + id);
+        })
+    }
+
+    function removeHandler(id) {
+        $.modal.confirm("确定要删除预约单么？", function () {
+            $.operate.submit(prefix + "/remove?id=" + id);
+        })
+    }
+
+    //思考： 取消逻辑---
+    //1:取消操作需要当前状态为预约中
+    //2：结合需要发现只需要改动状态：用户取消
+
+    function generateStatement(id){
+        var row = $("#bootstrap-table").bootstrapTable("getRowByUniqueId",id);
+        var mmsg = "确认生成结算单吗?";
+        if(row.status == 4){
+            mmsg = "是否需要查看对应的结算单明细";
+        }
+        $.modal.confirm(mmsg, function() {
+            //结算单有2种， 一种客户直接到店，客服手动添加
+            //另外一种， 客户预约，消费后，直接生成结算单
+            //此时做的预约单转成结算单， 所以跳转之前， 需要将预约到信息， 同步一个结算单中， 再进行跳转
+            $.operate.post(prefix + "/generateStatement",{serviceItemId:id},function(result){
+                if(result.code==web_status.SUCCESS){
+                    var url = ctx + "business/statementItem/itemDetail?statementId=" + result.data;
+                    $.modal.openTab("结算单明细", url);
+                }
+            });
+        });
+    }
+
+</script>
+</body>
+</html>

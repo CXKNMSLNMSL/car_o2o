@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="common/include :: header('员工添加')" />
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+	<form class="form-horizontal m" id="form-employee-add">
+		<div class="form-group">
+			<label class="col-sm-3 control-label">部门名称</label>
+			<div class="col-sm-8">
+				<label class="col-sm-3 control-label">开发部</label>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-3 control-label">部门编号</label>
+			<div class="col-sm-8">
+				<label class="col-sm-3 control-label">Monkey</label>
+			</div>
+		</div>
+	</form>
+</div>
+<th:block th:include="common/include :: footer" />
+<th:block th:include="common/include :: datetimepicker" />
+<script th:inline="javascript">
+	var prefix = ctx + "/business/employee"
+	$("#form-employee-add").validate({
+		focusCleanup: true
+	});
+</script>
+</body>
+</html>

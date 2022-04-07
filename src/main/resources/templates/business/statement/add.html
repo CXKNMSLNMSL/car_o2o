@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="common/include :: header('新增结算单')" />
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+	<form class="form-horizontal m" id="form-statement-add">
+		<div class="form-group">
+			<label class="col-sm-3 control-label">客户姓名：</label>
+			<div class="col-sm-8">
+				<input name="customerName" class="form-control" type="text">
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-3 control-label">联系方式：</label>
+			<div class="col-sm-8">
+				<input name="customerPhone" class="form-control" type="text">
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-3 control-label">到店时间：</label>
+			<div class="col-sm-8">
+				<div class="input-group date">
+					<input name="actualArrivalTime" class="form-control" placeholder="yyyy-MM-dd HH:mm" type="text">
+					<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+				</div>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-3 control-label">车牌号码：</label>
+			<div class="col-sm-8">
+				<input name="licensePlate" class="form-control" type="text">
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-3 control-label">汽车类型：</label>
+			<div class="col-sm-8">
+				<input name="carSeries" class="form-control" type="text">
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-3 control-label">服务类型：</label>
+			<div class="col-sm-8">
+				<select name="serviceType" class="form-control m-b" th:with="type=${@dict.getType('cmi_service_type')}">
+					<option th:each="dict : ${type}" th:text="${dict.label}" th:value="${dict.value}"></option>
+				</select>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-3 control-label">备注信息：</label>
+			<div class="col-sm-8">
+				<input name="info" class="form-control" type="text">
+			</div>
+		</div>
+	</form>
+</div>
+<th:block th:include="common/include :: footer" />
+<th:block th:include="common/include :: datetimepicker" />
+<script th:inline="javascript">
+	var prefix = ctx + "/business/statement"
+	$("#form-statement-add").validate({
+		focusCleanup: true
+	});
+
+	function submitHandler() {
+		if ($.validate.form()) {
+			$.operate.save(prefix + "/add", $('#form-statement-add').serialize());
+		}
+	}
+
+	$("input[name='actualArrivalTime']").datetimepicker({
+		format: "yyyy-mm-dd hh:ii",
+		autoclose: true
+	});
+</script>
+</body>
+</html>

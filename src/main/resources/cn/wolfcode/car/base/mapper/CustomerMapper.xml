@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.wolfcode.car.base.mapper.CustomerMapper" >
+  <resultMap id="BaseResultMap" type="cn.wolfcode.car.base.domain.Customer" >
+    <id column="id" property="id" />
+    <result column="name" property="name" />
+    <result column="phone" property="phone" />
+    <result column="age" property="age" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" >
+    delete from customer
+    where id = #{id}
+  </delete>
+  <insert id="insert" useGeneratedKeys="true" keyProperty="id" >
+    insert into customer (name, phone, age)
+    values (#{name}, #{phone}, #{age})
+  </insert>
+  <update id="updateByPrimaryKey" >
+    update customer
+    set name = #{name},
+      phone = #{phone},
+      age = #{age}
+    where id = #{id}
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" >
+    select id, name, phone, age
+    from customer
+    where id = #{id}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap" >
+    select id, name, phone, age
+    from customer
+  </select>
+
+  <select id="selectForList" resultMap="BaseResultMap" >
+    select id, name, phone, age
+    from customer
+    <where>
+      <if test="name != null and name != ''">
+        and name like concat('%',#{name},'%')
+      </if>
+      <if test="phone != null and phone != ''">
+        and phone like concat('%',#{phone},'%')
+      </if>
+    </where>
+  </select>
+
+
+</mapper>
